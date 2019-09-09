@@ -110,75 +110,67 @@ public class WordsSQLiteConnection extends SQLiteOpenHelper {
 
     public void addWord(String word, int freq) {
         synchronized (mDbName) {
-            SQLiteDatabase db = getWritableDatabase();
-
-            ContentValues values = new ContentValues();
-            values.put(Words._ID, word.hashCode()); // ensuring that any word is inserted once
-            values.put(Words.WORD, word);
-            values.put(Words.FREQUENCY, freq);
-            values.put(Words.LOCALE, mCurrentLocale);
-            long res = db.insert(TABLE_NAME, null, values);
-            if (res < 0) {
-                Logger.e(
-                        TAG,
-                        "Unable to insert '"
-                                + word
-                                + "' to SQLite storage ("
-                                + mCurrentLocale
-                                + "@"
-                                + mDbName
-                                + ")! Result:"
-                                + res);
+            try (SQLiteDatabase db = getWritableDatabase()) {
+                ContentValues values = new ContentValues();
+                values.put(Words._ID, word.hashCode()); // ensuring that any word is inserted once
+                values.put(Words.WORD, word);
+                values.put(Words.FREQUENCY, freq);
+                values.put(Words.LOCALE, mCurrentLocale);
+                long res = db.insert(TABLE_NAME, null, values);
+                if (res < 0) {
+                    Logger.e(
+                            TAG,
+                            "Unable to insert '"
+                                    + word
+                                    + "' to SQLite storage ("
+                                    + mCurrentLocale
+                                    + "@"
+                                    + mDbName
+                                    + ")! Result:"
+                                    + res);
+                }
             }
-            db.close();
         }
     }
 
     public void deleteWord(String word) {
         synchronized (mDbName) {
-            SQLiteDatabase db = getWritableDatabase();
-
-            db.delete(TABLE_NAME, Words.WORD + "=?", new String[] {word});
-            db.close();
+            try (SQLiteDatabase db = getWritableDatabase()) {
+                db.delete(TABLE_NAME, Words.WORD + "=?", new String[]{word});
+            }
         }
     }
 
     public void loadWords(BTreeDictionary.WordReadListener listener) {
         synchronized (mDbName) {
-            SQLiteDatabase db = getReadableDatabase();
-            Cursor c;
-            if (TextUtils.isEmpty(mCurrentLocale)) {
-                // some language packs will not provide locale, and Android _may_ crash here
-                c =
-                        db.query(
-                                TABLE_NAME,
-                                new String[] {Words._ID, Words.WORD, Words.FREQUENCY},
-                                "(" + Words.LOCALE + " IS NULL)",
-                                null,
-                                null,
-                                null,
-                                WORDS_ORDER_BY,
-                                null);
-            } else {
-                c =
-                        db.query(
-                                TABLE_NAME,
-                                new String[] {Words._ID, Words.WORD, Words.FREQUENCY},
-                                Words.LOCALE + "=?",
-                                new String[] {mCurrentLocale},
-                                null,
-                                null,
-                                Words._ID + " DESC",
-                                null);
-            }
+            try (SQLiteDatabase db = getReadableDatabase()) {
+                String selection;
+                String[] selectionArgs;
+                if (TextUtils.isEmpty(mCurrentLocale)) {
+                    // some language packs will not provide locale, and Android _may_ crash here
+                    selection = "(" + Words.LOCALE + " IS NULL)";
+                    selectionArgs = null;
 
-            if (c != null && c.moveToFirst()) {
-                while (!c.isAfterLast() && listener.onWordRead(c.getString(1), c.getInt(2))) {
-                    c.moveToNext();
+                } else {
+                    selection = Words.LOCALE + "=?";
+                    selectionArgs = new String[]{mCurrentLocale};
+                }
+                try (Cursor c = db.query(
+                        TABLE_NAME,
+                        new String[]{Words._ID, Words.WORD, Words.FREQUENCY},
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        WORDS_ORDER_BY,
+                        null)) {
+                    if (c != null && c.moveToFirst()) {
+                        while (!c.isAfterLast() && listener.onWordRead(c.getString(1), c.getInt(2))) {
+                            c.moveToNext();
+                        }
+                    }
                 }
             }
-            if (c != null) c.close();
-            db.close();
         }
     }
 
