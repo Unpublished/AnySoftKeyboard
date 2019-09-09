@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import com.anysoftkeyboard.ui.settings.MainSettingsActivity;
 import com.menny.android.anysoftkeyboard.R;
+
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -104,6 +106,11 @@ public abstract class RobolectricFragmentTestCase<T extends Fragment> {
         ensureAllScheduledJobsAreDone();
 
         startFragmentWithState(state);
+    }
+
+    @After
+    public void tearDown() {
+        getFragmentController().pause().stop().destroy();
     }
 
     public static class TestMainSettingsActivity extends MainSettingsActivity {
