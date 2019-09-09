@@ -22,6 +22,8 @@ import org.robolectric.Shadows;
 import org.robolectric.android.controller.ContentProviderController;
 import org.robolectric.shadows.ShadowDialog;
 
+import java.io.IOException;
+
 public class UserDictionaryEditorFragmentTest
         extends RobolectricFragmentTestCase<UserDictionaryEditorFragment> {
 
@@ -217,17 +219,17 @@ public class UserDictionaryEditorFragmentTest
     }
 
     @Test
-    public void testAndroidDictionaryLoad() {
+    public void testAndroidDictionaryLoad() throws IOException {
         // adding a few words to the dictionary
-        AndroidUserDictionaryTest.AUDContentProvider provider =
-                new AndroidUserDictionaryTest.AUDContentProvider();
-        ContentProviderController.of(provider).create(provider.getAuthority());
-        // setting up some dummy words
-        provider.addRow(1, "Dude", 1, "en");
-        provider.addRow(2, "Dudess", 2, "en");
-        provider.addRow(3, "shalom", 10, "iw");
-        provider.addRow(4, "telephone", 2, "iw");
-        provider.addRow(5, "catchall", 5, null);
+        try (AndroidUserDictionaryTest.AUDContentProvider provider = new AndroidUserDictionaryTest.AUDContentProvider()) {
+            ContentProviderController.of(provider).create(provider.getAuthority());
+            // setting up some dummy words
+            provider.addRow(1, "Dude", 1, "en");
+            provider.addRow(2, "Dudess", 2, "en");
+            provider.addRow(3, "shalom", 10, "iw");
+            provider.addRow(4, "telephone", 2, "iw");
+            provider.addRow(5, "catchall", 5, null);
+        }
 
         UserDictionaryEditorFragment fragment = startEditorFragment();
 

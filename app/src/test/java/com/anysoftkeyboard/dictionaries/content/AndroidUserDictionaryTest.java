@@ -9,7 +9,12 @@ import com.anysoftkeyboard.AnySoftKeyboardRobolectricTestRunner;
 import de.triplet.simpleprovider.AbstractProvider;
 import de.triplet.simpleprovider.Column;
 import de.triplet.simpleprovider.Table;
+
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collection;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,11 +89,23 @@ public class AndroidUserDictionaryTest {
                         .isEmpty());
     }
 
-    public static class AUDContentProvider extends AbstractProvider {
+    @After
+    public void tearDown() throws IOException {
+        mProvider.close();
+    }
+
+    public static class AUDContentProvider extends AbstractProvider implements Closeable {
 
         @Override
         public String getAuthority() {
             return UserDictionary.Words.CONTENT_URI.getAuthority();
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (super.mDatabase != null) {
+                super.mDatabase.close();
+            }
         }
 
         @Table
