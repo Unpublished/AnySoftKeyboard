@@ -191,26 +191,4 @@ workflows:
 
   build_check_tests_deploy:
     jobs:
-      - build_check
       - test
-      - heavy_test:
-          requires:
-            - build_check
-      - deploy_release:
-          filters:
-            branches:
-              only:
-                - /release-branch-v.*/
-          requires:
-            - build_check
-            - test
-            - heavy_test
-      - deploy_canary:
-          filters:
-            branches:
-              only:
-                - master
-          requires:
-            - build_check
-            - test
-            - heavy_test
