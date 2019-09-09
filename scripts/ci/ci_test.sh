@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-./gradlew --stacktrace testDebugUnitTest testDebugUnitTestCoverage -PexcludeTestClasses="**/*AllSdkTest*"
+./gradlew --stacktrace -i testDebugUnitTest testDebugUnitTestCoverage -PexcludeTestClasses="**/*AllSdkTest*"
