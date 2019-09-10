@@ -10,7 +10,7 @@ android {
                 int maxTestForks = Integer.parseInt(System.getProperty('maxTestForks', project.path == ':app' ? '4' : '1'))
                 maxParallelForks Math.min(maxTestForks, 1)
 
-                forkEvery Integer.parseInt(System.getProperty('TEST_FORK_EVERY', '0'))
+                forkEvery Integer.parseInt(System.getProperty('TEST_FORK_EVERY', '10'))
 
                 testLogging {
                     if (isCi) {
