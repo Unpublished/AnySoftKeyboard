@@ -2,16 +2,6 @@ name: checks
 
 on:
   push:
-    paths-ignore:
-      - deployment/halt_deployment_marker
-    branches:
-      - master
-      - release-branch-*
-  pull_request:
-    paths-ignore:
-      - deployment/halt_deployment_marker
-    branches:
-      - '*'
 
 env:
   TERM: dumb
@@ -242,46 +232,3 @@ jobs:
     steps:
       - name: ready
         run: echo "DONE"
-
-  deploy-request:
-    if: github.event_name == 'push'
-    needs: [master-green-requirement]
-    runs-on: ubuntu-18.04
-    container: menny/android_base:1.14.0
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/deploy-request
-        name: request-new-deploys
-        with:
-          sha: ${{ github.sha }}
-          ref: ${{ github.ref }}
-          new_deploy: true
-          api_username: ${{ secrets.BOT_MASTER_RW_GITHUB_USERNAME }}
-          api_token: ${{ secrets.BOT_MASTER_RW_GITHUB_TOKEN }}
-
-  merge-to-master:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release-branch-')
-    needs: [master-green-requirement]
-    runs-on: ubuntu-18.04
-    container: menny/android_base:1.14.0
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.BOT_MASTER_RW_GITHUB_TOKEN }}
-          fetch-depth: 0
-          ref: master
-      - name: create-merge-commit
-        run: ./scripts/ci/ci_merge_to_master.sh ${{ github.ref }}
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v3.5.0
-        with:
-          token: ${{ secrets.BOT_MASTER_RW_GITHUB_TOKEN }}
-          commit-message: 'Merge to master from ${{ github.ref }}.'
-          title: 'Automated Merge to master from ${{ github.ref }}'
-          committer: 'Polyglot <ask@evendanan.net>'
-          author: 'Polyglot <ask@evendanan.net>'
-          body: 'Generated from commit ${{ github.sha }} on ${{ github.ref }}.'
-          team-reviewers: maintainers
-          branch: 'bot-pr/merge-to-master-from-${{ github.ref }}'
-          base: master
-          labels: automerge
