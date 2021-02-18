@@ -197,30 +197,8 @@ jobs:
           name: verify-all-addons-build-logging
           path: build-logging
 
-  deploy-dry-run:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v1.1.2
-        with:
-          path: .github_cache_gradle/
-          key: dry-run-deploy-gradle-v2-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/*.gradle') }}-${{ hashFiles('buildSrc/**/*.java') }}
-          restore-keys: dry-run-deploy-gradle-v2-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-
-      - name: setup
-        run: ./scripts/ci/ci_setup.sh
-      - name: dry-run-release-build
-        run: |
-          mkdir -p /root/.android/ || true
-          cp ./.github/actions/deploy/debug.keystore /root/.android/ || exit 1
-          ./gradlew -PwithAutoVersioning :generateFdroidYamls -DdeployChannel=alpha assembleRelease assembleCanary verifyReleaseResources generateReleasePlayResources generateCanaryPlayResources
-          chmod -R a+rwx .
-      - uses: actions/upload-artifact@v1.0.0
-        with:
-          name: fdroid-metadata-dry-run
-          path: outputs/fdroid
-
   master-green-requirement:
-    needs: [static-checks, linters, app-all-sdks-tests, app-tests-shards, app-less-tests, deploy-dry-run, verify-all-addons]
+    needs: [static-checks, linters, app-all-sdks-tests, app-tests-shards, app-less-tests, verify-all-addons]
     runs-on: ubuntu-18.04
     steps:
       - name: ready
