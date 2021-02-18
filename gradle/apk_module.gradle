@@ -78,7 +78,7 @@ android {
     }
 }
 
-if (project.ext.shouldBePublished) {
+if (false) {
     project.apply plugin: 'com.github.triplet.play'
 
     play {
