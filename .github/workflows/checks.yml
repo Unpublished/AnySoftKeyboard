@@ -17,6 +17,7 @@ jobs:
       - uses: joschi/setup-jdk@v2
         with:
           java-version: '11'
+          openjdk_impl: 'openj9'
       - uses: actions/cache@v1.1.2
         with:
           path: .github_cache_gradle/
@@ -24,5 +25,5 @@ jobs:
           restore-keys: verify-all-addons-gradle-v2-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-
       - name: verify-add-ons
         run: |
-          ls -la $JAVA_HOME/bin/
-          ./gradlew :addons:languages:arabic:apk:assembleRelease
+          ./gradlew clean :addons:languages:arabic:apk:assembleRelease
+          ./gradlew clean :addons:languages:arabic:apk:assembleRelease
