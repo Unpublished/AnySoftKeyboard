@@ -234,7 +234,7 @@ jobs:
         run: echo "DONE"
 
   deploy-request:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && 'AnySoftKeyboard/AnySoftKeyboard' == github.repository
     needs: [master-green-requirement]
     runs-on: ubuntu-18.04
     container: menny/android_base:1.14.0
