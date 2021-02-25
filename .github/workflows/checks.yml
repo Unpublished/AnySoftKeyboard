@@ -2,16 +2,6 @@ name: checks
 
 on:
   push:
-    paths-ignore:
-      - deployment/halt_deployment_marker
-    branches:
-      - master
-      - release-branch-*
-  pull_request:
-    paths-ignore:
-      - deployment/halt_deployment_marker
-    branches:
-      - '*'
 
 env:
   TERM: dumb
